@@ -102,10 +102,11 @@
     scrollbar-width:thin;
     scrollbar-color:var(--accent-line) transparent;
     cursor:grab;
-    touch-action:pan-x pan-y;
+    touch-action:pan-y;
     -webkit-overflow-scrolling:touch;
   }
-  .marquee.dragging{cursor:grabbing;user-select:none}
+  .marquee.dragging{cursor:grabbing;user-select:none;scroll-behavior:auto}
+  .marquee.dragging .shot{transition:none}
   .marquee::-webkit-scrollbar{height:7px}
   .marquee::-webkit-scrollbar-thumb{background:var(--accent-line);border-radius:999px}
   .marquee::-webkit-scrollbar-track{background:transparent}
@@ -129,11 +130,11 @@
     margin:0;
     transform:scale(var(--focus-scale));
     transform-origin:center;
-    transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,opacity .2s ease;
+    transition:transform .2s ease,border-color .2s ease,opacity .2s ease;
     opacity:.8;
   }
-  .shot.is-centered{border-color:var(--accent-line);box-shadow:0 12px 32px rgba(122,40,53,.15);opacity:1;z-index:2}
-  .shot img,.shot video{height:100%;width:auto;max-width:min(72vw,440px);display:block;object-fit:cover;pointer-events:none}
+  .shot.is-centered{border-color:var(--accent-line);opacity:1;z-index:2}
+  .shot img,.shot video{height:100%;width:auto;max-width:min(72vw,440px);display:block;object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
   .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 13px 10px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.75));pointer-events:none}
   html.ko .shot figcaption{letter-spacing:.02em}
 
@@ -625,32 +626,33 @@
     }
 
     marquee.addEventListener('wheel',function(){pause(1000)},{passive:true});
-    marquee.addEventListener('touchstart',function(){pause(1200)},{passive:true});
-    marquee.addEventListener('touchend',function(){pause(850)},{passive:true});
-    marquee.addEventListener('touchcancel',function(){pause(850)},{passive:true});
     marquee.addEventListener('scroll',function(){
       if(performance.now()-lastAutoScroll>80)pause(700);
       normalizeScroll();
       updateFocus();
     },{passive:true});
 
+    marquee.addEventListener('dragstart',function(e){e.preventDefault()});
     marquee.addEventListener('pointerdown',function(e){
-      if(e.pointerType==='touch')return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
       dragging=true;
       pause(1000000);
       startX=e.clientX;
       startScroll=marquee.scrollLeft;
       marquee.classList.add('dragging');
-      marquee.setPointerCapture&&marquee.setPointerCapture(e.pointerId);
+      if(marquee.setPointerCapture){
+        try{marquee.setPointerCapture(e.pointerId)}catch(_){}
+      }
       e.preventDefault();
     });
     marquee.addEventListener('pointermove',function(e){
       if(!dragging)return;
-      marquee.scrollLeft=startScroll-(e.clientX-startX);
+      var delta=e.clientX-startX;
+      marquee.scrollLeft=startScroll-delta;
       normalizeScroll();
       updateFocus();
       e.preventDefault();
-    });
+    },{passive:false});
     function endDrag(e){
       if(!dragging)return;
       dragging=false;
