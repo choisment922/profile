@@ -91,41 +91,70 @@
   .btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink);box-shadow:none}
   .btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
 
-  /* ── highlights horizontal scroll ── */
+  /* ── showcase marquee ── */
   .showcase{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
-  .showcase-head{max-width:var(--maxw);margin:0 auto;padding:20px 40px 0;display:flex;align-items:center;justify-content:space-between;gap:20px}
-  .showcase-controls{display:flex;gap:8px}
-  .scroll-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--ink);font-size:1rem;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
-  .scroll-btn:hover{background:var(--accent-soft);border-color:var(--accent-line);transform:translateY(-1px)}
-  .scroll-btn:disabled{opacity:.35;cursor:default;transform:none}
-  .highlight-scroll{display:flex;gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:max(40px,calc((100vw - var(--maxw))/2 + 40px));padding:20px max(40px,calc((100vw - var(--maxw))/2 + 40px)) 28px;scrollbar-width:none;-ms-overflow-style:none;cursor:grab}
-  .highlight-scroll::-webkit-scrollbar{display:none}
-  .highlight-scroll.dragging{cursor:grabbing;scroll-snap-type:none;user-select:none}
-  .highlight-scroll img,.highlight-scroll video{-webkit-user-drag:none;user-select:none;pointer-events:none}
-  .highlight-scroll .shot{touch-action:pan-y}
-  .shot{position:relative;flex:0 0 auto;height:250px;max-width:min(72vw,430px);border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f1f1ee;margin:0;scroll-snap-align:start;scroll-snap-stop:always;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
-  .shot:hover{transform:translateY(-6px);border-color:var(--accent-line);box-shadow:0 14px 32px rgba(122,40,53,.12)}
-  .shot img,.shot video{height:100%;width:auto;max-width:100%;display:block;object-fit:cover;transition:transform .5s ease}
-  .shot:hover img,.shot:hover video{transform:scale(1.04)}
-  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 11px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78));pointer-events:none}
-  .shot:has(img){cursor:zoom-in}
+  .showcase .cap-lbl{padding:20px 40px 0;max-width:calc(var(--maxw) + 80px);margin:0 auto}
+  .marquee{position:relative;overflow:hidden;touch-action:pan-y}
+  .marquee.manual{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--accent-line) transparent;touch-action:pan-x pan-y;cursor:grab}
+  .marquee.manual:active{cursor:grabbing}
+  .marquee.manual::-webkit-scrollbar{height:8px}
+  .marquee.manual::-webkit-scrollbar-thumb{background:var(--accent-line);border-radius:999px}
+  .marquee.manual::-webkit-scrollbar-track{background:transparent}
+  .marquee::before,.marquee::after{content:"";position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none;transition:opacity .25s ease}
+  .marquee::before{left:0;background:linear-gradient(90deg,var(--paper),transparent)}
+  .marquee::after{right:0;background:linear-gradient(270deg,var(--paper),transparent)}
+  .marquee.manual::before,.marquee.manual::after{opacity:0}
+  .track{display:flex;gap:16px;width:max-content;padding:20px max(24px,calc((100vw - var(--maxw))/2 + 40px));animation:scroll 70s linear infinite;will-change:transform}
+  .marquee.manual .track{animation:none;transform:none!important}
+  .marquee:hover .track{animation-play-state:paused}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .shot{position:relative;flex:0 0 auto;height:250px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f1f1ee;margin:0;cursor:zoom-in;transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease}
+  .shot:hover{border-color:var(--accent-line);box-shadow:0 10px 28px rgba(122,40,53,.12);transform:translateY(-2px)}
+  .shot img, .shot video{height:100%;width:auto;max-width:min(72vw,440px);display:block;object-fit:cover;transition:transform .5s ease;}
+  .shot:hover img, .shot:hover video{transform:scale(1.05);}
+  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 13px 10px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.75))}
   html.ko .shot figcaption{letter-spacing:.02em}
 
-  /* ── highlight image lightbox ── */
-  .lightbox{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:32px;background:rgba(15,15,16,.88);backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
-  .lightbox.open{opacity:1;visibility:visible}
-  .lightbox-dialog{position:relative;max-width:min(94vw,1280px);max-height:90vh;transform:scale(.96);transition:transform .24s ease}
-  .lightbox.open .lightbox-dialog{transform:scale(1)}
-  .lightbox-image{display:block;max-width:100%;max-height:86vh;width:auto;height:auto;border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
-  .lightbox-caption{margin-top:12px;text-align:center;color:rgba(255,255,255,.82);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em}
-  .lightbox-close{position:absolute;right:-14px;top:-14px;width:40px;height:40px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(20,20,20,.78);color:#fff;font-size:1.35rem;line-height:1;cursor:pointer}
+  .lightbox{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:clamp(18px,4vw,48px);background:rgba(10,11,13,.9);backdrop-filter:blur(8px)}
+  .lightbox.open{display:flex}
+  .lightbox-inner{position:relative;max-width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .lightbox-media{max-width:100%;max-height:calc(100vh - 120px);border-radius:12px;box-shadow:0 22px 70px rgba(0,0,0,.45);object-fit:contain;background:#111}
+  .lightbox-caption{color:#fff;font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-align:center}
+  .lightbox-close{position:absolute;top:14px;right:14px;z-index:2;width:42px;height:42px;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer}
   body.lightbox-open{overflow:hidden}
-  @media(max-width:640px){
-    .showcase-head{padding:18px 24px 0}
-    .showcase-controls{display:none}
-    .highlight-scroll{gap:12px;scroll-padding-inline:24px;padding:18px 24px 24px}
-    .shot{height:190px;max-width:calc(100vw - 56px)}
+
+  @media(max-width:760px){
+    .wrap{padding-left:clamp(20px,5vw,28px);padding-right:clamp(20px,5vw,28px)}
+    .hero{padding:82px 0 58px}
+    section{padding:58px 0}
+    .showcase .cap-lbl{padding:18px clamp(20px,5vw,28px) 0}
+    .track{gap:12px;padding:18px clamp(20px,5vw,28px)}
+    .shot{height:clamp(165px,52vw,220px);border-radius:9px}
+    .shot img,.shot video{max-width:78vw}
+    .marquee::before,.marquee::after{width:36px}
+    .row-head{align-items:flex-start;flex-direction:column;gap:6px}
+    .row .yr{white-space:normal}
+    .award{gap:14px}
   }
+  @media(max-width:480px){
+    body{font-size:16px}
+    .topbar .wrap{height:58px}
+    .right{gap:10px}
+    .hero{padding-top:66px}
+    h1{font-size:clamp(2.8rem,18vw,4.2rem)}
+    .lede{font-size:1.18rem}
+    .spec{grid-template-columns:1fr}
+    .spec>div{padding:15px 16px}
+    .actions{display:grid;grid-template-columns:1fr}
+    .btn{justify-content:center;width:100%}
+    .shot{height:clamp(150px,56vw,195px)}
+    .shot img,.shot video{max-width:84vw}
+    .lightbox{padding:14px}
+    .lightbox-media{max-height:calc(100vh - 92px)}
+    .lightbox-close{top:8px;right:8px}
+    footer{padding-bottom:36px}
+  }
+  @media(prefers-reduced-motion:reduce){.track{animation:none}.marquee{overflow-x:auto}.marquee .track{transform:none!important}}
 
   /* ── section grid ── */
   section{padding:76px 0;border-top:1px solid var(--line)}
@@ -266,35 +295,35 @@
 
   <!-- ══════════ SHOWCASE ══════════ -->
   <section class="showcase" aria-label="Highlights">
-    <div class="showcase-head">
-      <div class="lbl"><span class="idx">§</span><span class="en">Highlights</span><span class="ko">발자취</span></div>
-      <div class="showcase-controls" aria-label="Highlight navigation">
-        <button class="scroll-btn prev" type="button" aria-label="Previous highlight">←</button>
-        <button class="scroll-btn next" type="button" aria-label="Next highlight">→</button>
+    <div class="cap-lbl"><div class="lbl"><span class="idx">§</span><span class="en">Highlights</span><span class="ko">발자취</span></div></div>
+    <div class="marquee">
+      <div class="track">
+        <!-- ‹EDIT› set of photos. To add one, drop an image in /assets and copy a <figure> block.
+             The whole set is duplicated below for a seamless loop — edit BOTH copies. -->
+        <figure class="shot"><img src="assets/isef-booth.jpg" alt="ISEF 2025 booth, Cycling Tourism Platform"><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
+        <figure class="shot"><img src="assets/award-swdonghaeng.jpg" alt="SW동행 hackathon award ceremony"><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
+        <figure class="shot"><img src="assets/ebs-interview.jpg" alt="EBS1 interview"><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
+        <figure class="shot"><img src="assets/startup-booth.jpg" alt="Youth Startup Competition booth"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+        <figure class="shot"><img src="assets/isef-team.jpg" alt="ISEF 2025 team"><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
+        <figure class="shot"><img src="assets/sw-competition.jpg" alt="National high-school software competition"><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
+        <figure class="shot"><img src="assets/startup-stage.jpg" alt="Youth Startup Competition award stage"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+        <figure class="shot"><img src="assets/route-data.jpg" alt="Ant's movement analysis"><figcaption><span class="en">Ant's movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
+        <figure class="shot"><img src="assets/AI-Rookie.jpg" alt="AI Rookie competition"><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
+        <figure class="shot"><video autoplay muted loop playsinline preload="metadata"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant's movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
+        <!-- duplicate copy (seamless loop) -->
+        <figure class="shot" aria-hidden="true"><img src="assets/isef-booth.jpg" alt=""><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/award-swdonghaeng.jpg" alt=""><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/ebs-interview.jpg" alt=""><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/startup-booth.jpg" alt=""><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/isef-team.jpg" alt=""><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/sw-competition.jpg" alt=""><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/startup-stage.jpg" alt=""><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/route-data.jpg" alt=""><figcaption><span class="en">Ant's movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
+        <figure class="shot" aria-hidden="true"><img src="assets/AI-Rookie.jpg" alt=""><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
+        <figure class="shot"><video autoplay muted loop playsinline preload="metadata"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant's movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
       </div>
     </div>
-    <div class="highlight-scroll" tabindex="0" aria-label="Scrollable highlights">
-      <!-- ‹EDIT› To add an item, place its media in /assets and copy one <figure> block. -->
-      <figure class="shot"><img src="assets/isef-booth.jpg" alt="ISEF 2025 booth, Cycling Tourism Platform"><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
-      <figure class="shot"><img src="assets/award-swdonghaeng.jpg" alt="SW동행 hackathon award ceremony"><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
-      <figure class="shot"><img src="assets/ebs-interview.jpg" alt="EBS1 interview"><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
-      <figure class="shot"><img src="assets/startup-booth.jpg" alt="Youth Startup Competition booth"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-      <figure class="shot"><img src="assets/isef-team.jpg" alt="ISEF 2025 team"><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
-      <figure class="shot"><img src="assets/sw-competition.jpg" alt="National high-school software competition"><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
-      <figure class="shot"><img src="assets/startup-stage.jpg" alt="Youth Startup Competition award stage"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-      <figure class="shot"><img src="assets/route-data.jpg" alt="Ant movement analysis"><figcaption><span class="en">Ant movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
-      <figure class="shot"><img src="assets/AI-Rookie.jpg" alt="AI Rookie competition"><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
-      <figure class="shot"><video autoplay muted loop playsinline preload="metadata" aria-label="Ant movement tracking video"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
-    </div>
   </section>
-
-  <div class="lightbox" id="highlight-lightbox" role="dialog" aria-modal="true" aria-label="Expanded highlight image" aria-hidden="true">
-    <div class="lightbox-dialog">
-      <button class="lightbox-close" type="button" aria-label="Close expanded image">×</button>
-      <img class="lightbox-image" alt="">
-      <div class="lightbox-caption"></div>
-    </div>
-  </div>
 
   <!-- ══════════ ABOUT ══════════ -->
   <section id="about">
@@ -450,6 +479,11 @@
   </section>
 </main>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" aria-hidden="true">
+  <button class="lightbox-close" type="button" aria-label="Close preview">×</button>
+  <div class="lightbox-inner"></div>
+</div>
+
 <footer>
   <div class="wrap">
     <span>© <span id="yr"></span> <span class="en">Sungmin Choi</span><span class="ko">최성민</span></span>
@@ -477,183 +511,76 @@
     el.style.transitionDelay = (Math.min(i,6)*60)+'ms'; io.observe(el);
   });
 
-  // Highlights: reliable idle auto-scroll, wheel/drag inertia, and image lightbox.
+  // Highlights: autoplay until the user intentionally interacts, then switch to manual scrolling.
   (function(){
-    var scroller=document.querySelector('.highlight-scroll');
-    if(!scroller)return;
+    var marquee=document.querySelector('.marquee');
+    var track=marquee&&marquee.querySelector('.track');
+    if(!marquee||!track)return;
+    var manual=false, dragging=false, startX=0, startScroll=0, moved=false;
 
-    var prev=document.querySelector('.scroll-btn.prev');
-    var next=document.querySelector('.scroll-btn.next');
-    var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var AUTO_DELAY=1800;
-    var AUTO_PX_PER_SECOND=28;
-    var resumeAt=performance.now()+700;
-    var lastFrame=performance.now();
-    var velocity=0;
-    var dragging=false;
-    var moved=false;
-    var startX=0;
-    var lastX=0;
-    var lastPointerTime=0;
-    var activePointerId=null;
-
-    function step(){
-      var card=scroller.querySelector('.shot');
-      return card ? card.getBoundingClientRect().width+16 : 360;
-    }
-    function maxScroll(){return Math.max(0,scroller.scrollWidth-scroller.clientWidth);}
-    function pauseAuto(ms){resumeAt=performance.now()+(typeof ms==='number'?ms:AUTO_DELAY);}
-    function updateButtons(){
-      var max=maxScroll();
-      if(prev)prev.disabled=scroller.scrollLeft<=2;
-      if(next)next.disabled=scroller.scrollLeft>=max-2;
-    }
-    function manualScroll(amount){
-      pauseAuto();
-      velocity=0;
-      scroller.scrollBy({left:amount,behavior:'smooth'});
+    function enableManual(){
+      if(manual)return;
+      var matrix=new DOMMatrixReadOnly(getComputedStyle(track).transform);
+      var offset=Math.abs(matrix.m41||0);
+      manual=true;
+      marquee.classList.add('manual');
+      marquee.scrollLeft=offset;
+      track.querySelectorAll('[aria-hidden="true"]').forEach(function(el){el.removeAttribute('aria-hidden')});
     }
 
-    if(prev)prev.addEventListener('click',function(){manualScroll(-step());});
-    if(next)next.addEventListener('click',function(){manualScroll(step());});
-    scroller.addEventListener('scroll',updateButtons,{passive:true});
-    window.addEventListener('resize',updateButtons);
-
-    // Wheel: vertical or horizontal wheel gestures move the strip horizontally.
-    scroller.addEventListener('wheel',function(e){
-      if(maxScroll()<=0)return;
-      var delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-      if(!delta)return;
-      e.preventDefault();
-      pauseAuto();
-      velocity+=delta*0.16;
-      velocity=Math.max(-42,Math.min(42,velocity));
-    },{passive:false});
-
-    scroller.addEventListener('keydown',function(e){
-      if(e.key==='ArrowRight'){e.preventDefault();manualScroll(step());}
-      if(e.key==='ArrowLeft'){e.preventDefault();manualScroll(-step());}
+    ['wheel','touchstart','pointerdown'].forEach(function(type){
+      marquee.addEventListener(type,enableManual,{passive:true,once:false});
     });
 
-    // Mouse / pen drag. Native touch scrolling remains available on mobile.
-    scroller.addEventListener('pointerdown',function(e){
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      if(e.pointerType==='touch'){
-        pauseAuto();
-        return;
-      }
-      activePointerId=e.pointerId;
-      dragging=true;
-      moved=false;
-      velocity=0;
-      startX=lastX=e.clientX;
-      lastPointerTime=performance.now();
-      scroller.classList.add('dragging');
-      scroller.setPointerCapture(e.pointerId);
-      pauseAuto();
-      e.preventDefault();
+    marquee.addEventListener('pointerdown',function(e){
+      if(e.pointerType==='touch')return;
+      enableManual(); dragging=true; moved=false; startX=e.clientX; startScroll=marquee.scrollLeft;
+      marquee.setPointerCapture&&marquee.setPointerCapture(e.pointerId);
     });
-
-    scroller.addEventListener('pointermove',function(e){
-      if(!dragging||e.pointerId!==activePointerId)return;
-      var now=performance.now();
-      var dx=e.clientX-lastX;
-      var dt=Math.max(1,now-lastPointerTime);
-      if(Math.abs(e.clientX-startX)>4)moved=true;
-      scroller.scrollLeft-=dx;
-      velocity=(-dx/dt)*16.667;
-      velocity=Math.max(-48,Math.min(48,velocity));
-      lastX=e.clientX;
-      lastPointerTime=now;
-      e.preventDefault();
+    marquee.addEventListener('pointermove',function(e){
+      if(!dragging)return;
+      var dx=e.clientX-startX;
+      if(Math.abs(dx)>4)moved=true;
+      marquee.scrollLeft=startScroll-dx;
     });
+    function endDrag(){dragging=false}
+    marquee.addEventListener('pointerup',endDrag);
+    marquee.addEventListener('pointercancel',endDrag);
 
-    function endPointer(e){
-      if(!dragging||e.pointerId!==activePointerId)return;
-      dragging=false;
-      activePointerId=null;
-      scroller.classList.remove('dragging');
-      try{scroller.releasePointerCapture(e.pointerId);}catch(err){}
-      pauseAuto();
-      setTimeout(function(){moved=false;},0);
-    }
-    scroller.addEventListener('pointerup',endPointer);
-    scroller.addEventListener('pointercancel',endPointer);
-    scroller.addEventListener('lostpointercapture',function(){
-      dragging=false;
-      activePointerId=null;
-      scroller.classList.remove('dragging');
-    });
-    scroller.addEventListener('touchstart',function(){pauseAuto();},{passive:true});
-    scroller.addEventListener('touchend',function(){pauseAuto();},{passive:true});
+    var lightbox=document.getElementById('lightbox');
+    var inner=lightbox.querySelector('.lightbox-inner');
+    var closeBtn=lightbox.querySelector('.lightbox-close');
 
-    // One animation loop handles both inertia and idle auto-scroll.
-    function animate(now){
-      var dt=Math.min(40,Math.max(0,now-lastFrame));
-      lastFrame=now;
-      var max=maxScroll();
-
-      if(!dragging&&Math.abs(velocity)>.05){
-        scroller.scrollLeft+=velocity*(dt/16.667);
-        velocity*=Math.pow(0.92,dt/16.667);
-        if(scroller.scrollLeft<=0||scroller.scrollLeft>=max)velocity=0;
-      }else if(!dragging&&!reduced&&now>=resumeAt&&document.visibilityState==='visible'&&max>0){
-        scroller.scrollLeft+=AUTO_PX_PER_SECOND*(dt/1000);
-        if(scroller.scrollLeft>=max-0.5){
-          scroller.scrollLeft=0;
-          resumeAt=now+500;
-        }
-      }
-      requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-
-    // Click an image card to enlarge only that image. Dragging never opens it.
-    var lightbox=document.getElementById('highlight-lightbox');
-    var lightboxImg=lightbox&&lightbox.querySelector('.lightbox-image');
-    var lightboxCaption=lightbox&&lightbox.querySelector('.lightbox-caption');
-    var closeBtn=lightbox&&lightbox.querySelector('.lightbox-close');
-    var lastFocus=null;
-    function openLightbox(img,figure){
-      if(!lightbox||!lightboxImg)return;
-      lastFocus=document.activeElement;
-      lightboxImg.src=img.currentSrc||img.src;
-      lightboxImg.alt=img.alt||'';
-      var cap=figure.querySelector('figcaption');
-      lightboxCaption.innerHTML=cap?cap.innerHTML:'';
+    function openLightbox(shot){
+      if(moved)return;
+      var media=shot.querySelector('img,video');
+      if(!media)return;
+      inner.innerHTML='';
+      var clone=media.cloneNode(true);
+      clone.classList.add('lightbox-media');
+      if(clone.tagName==='VIDEO'){clone.controls=true;clone.autoplay=true;clone.muted=false}
+      inner.appendChild(clone);
+      var cap=shot.querySelector('figcaption');
+      if(cap){var c=document.createElement('div');c.className='lightbox-caption';c.innerHTML=cap.innerHTML;inner.appendChild(c)}
       lightbox.classList.add('open');
       lightbox.setAttribute('aria-hidden','false');
       document.body.classList.add('lightbox-open');
-      if(closeBtn)closeBtn.focus();
-      pauseAuto(1000000000);
+      closeBtn.focus();
     }
     function closeLightbox(){
-      if(!lightbox)return;
       lightbox.classList.remove('open');
       lightbox.setAttribute('aria-hidden','true');
       document.body.classList.remove('lightbox-open');
-      lightboxImg.removeAttribute('src');
-      pauseAuto();
-      if(lastFocus&&lastFocus.focus)lastFocus.focus();
+      inner.querySelectorAll('video').forEach(function(v){v.pause()});
+      inner.innerHTML='';
     }
-    scroller.querySelectorAll('.shot img').forEach(function(img){
-      var figure=img.closest('.shot');
-      img.draggable=false;
-      figure.setAttribute('tabindex','0');
-      figure.setAttribute('role','button');
-      figure.setAttribute('aria-label',(img.alt||'Highlight image')+' — enlarge');
-      figure.addEventListener('click',function(){
-        if(!moved)openLightbox(img,figure);
-      });
-      figure.addEventListener('keydown',function(e){
-        if(e.key==='Enter'||e.key===' '){e.preventDefault();openLightbox(img,figure);}
-      });
+    track.addEventListener('click',function(e){
+      var shot=e.target.closest('.shot');
+      if(shot)openLightbox(shot);
     });
-    if(closeBtn)closeBtn.addEventListener('click',closeLightbox);
-    if(lightbox)lightbox.addEventListener('click',function(e){if(e.target===lightbox)closeLightbox();});
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lightbox&&lightbox.classList.contains('open'))closeLightbox();});
-
-    updateButtons();
+    closeBtn.addEventListener('click',closeLightbox);
+    lightbox.addEventListener('click',function(e){if(e.target===lightbox)closeLightbox()});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lightbox.classList.contains('open'))closeLightbox()});
   })();
 </script>
 </body>
