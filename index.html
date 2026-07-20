@@ -91,24 +91,28 @@
   .btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink);box-shadow:none}
   .btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
 
-  /* ── showcase marquee ── */
+  /* ── highlights horizontal scroll ── */
   .showcase{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
-  .showcase .cap-lbl{padding:20px 40px 0;max-width:calc(var(--maxw) + 80px);margin:0 auto}
-  .marquee{position:relative;overflow:hidden}
-  .marquee::before,.marquee::after{content:"";position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none}
-  .marquee::before{left:0;background:linear-gradient(90deg,var(--paper),transparent)}
-  .marquee::after{right:0;background:linear-gradient(270deg,var(--paper),transparent)}
-  .track{display:flex;gap:16px;width:max-content;padding:20px 8px;animation:scroll 70s linear infinite}
-  .marquee:hover .track{animation-play-state:paused}
-  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .shot{position:relative;flex:0 0 auto;height:250px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f1f1ee;margin:0;transition:border-color .25s ease,box-shadow .25s ease}
-  .shot:hover{border-color:var(--accent-line);box-shadow:0 10px 28px rgba(122,40,53,.12)}
-  .shot img, .shot video{height:100%;width:auto;display:block;object-fit:cover;transition:transform .5s ease;}
-  .shot:hover img, .shot:hover video{transform:scale(1.05);}
-  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 13px 10px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+  .showcase-head{max-width:var(--maxw);margin:0 auto;padding:20px 40px 0;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .showcase-controls{display:flex;gap:8px}
+  .scroll-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--ink);font-size:1rem;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+  .scroll-btn:hover{background:var(--accent-soft);border-color:var(--accent-line);transform:translateY(-1px)}
+  .scroll-btn:disabled{opacity:.35;cursor:default;transform:none}
+  .highlight-scroll{display:flex;gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:max(40px,calc((100vw - var(--maxw))/2 + 40px));padding:20px max(40px,calc((100vw - var(--maxw))/2 + 40px)) 28px;scrollbar-width:none;-ms-overflow-style:none;cursor:grab}
+  .highlight-scroll::-webkit-scrollbar{display:none}
+  .highlight-scroll.dragging{cursor:grabbing;scroll-snap-type:none;user-select:none}
+  .shot{position:relative;flex:0 0 auto;height:250px;max-width:min(72vw,430px);border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f1f1ee;margin:0;scroll-snap-align:start;scroll-snap-stop:always;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+  .shot:hover{transform:translateY(-6px);border-color:var(--accent-line);box-shadow:0 14px 32px rgba(122,40,53,.12)}
+  .shot img,.shot video{height:100%;width:auto;max-width:100%;display:block;object-fit:cover;transition:transform .5s ease}
+  .shot:hover img,.shot:hover video{transform:scale(1.04)}
+  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 11px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78))}
   html.ko .shot figcaption{letter-spacing:.02em}
-  @media(max-width:640px){.shot{height:180px}.showcase .cap-lbl{padding-left:24px}}
-  @media(prefers-reduced-motion:reduce){.track{animation:none}.marquee{overflow-x:auto}}
+  @media(max-width:640px){
+    .showcase-head{padding:18px 24px 0}
+    .showcase-controls{display:none}
+    .highlight-scroll{gap:12px;scroll-padding-inline:24px;padding:18px 24px 24px}
+    .shot{height:190px;max-width:calc(100vw - 56px)}
+  }
 
   /* ── section grid ── */
   section{padding:76px 0;border-top:1px solid var(--line)}
@@ -249,33 +253,25 @@
 
   <!-- ══════════ SHOWCASE ══════════ -->
   <section class="showcase" aria-label="Highlights">
-    <div class="cap-lbl"><div class="lbl"><span class="idx">§</span><span class="en">Highlights</span><span class="ko">발자취</span></div></div>
-    <div class="marquee">
-      <div class="track">
-        <!-- ‹EDIT› set of photos. To add one, drop an image in /assets and copy a <figure> block.
-             The whole set is duplicated below for a seamless loop — edit BOTH copies. -->
-        <figure class="shot"><img src="assets/isef-booth.jpg" alt="ISEF 2025 booth, Cycling Tourism Platform"><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
-        <figure class="shot"><img src="assets/award-swdonghaeng.jpg" alt="SW동행 hackathon award ceremony"><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
-        <figure class="shot"><img src="assets/ebs-interview.jpg" alt="EBS1 interview"><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
-        <figure class="shot"><img src="assets/startup-booth.jpg" alt="Youth Startup Competition booth"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-        <figure class="shot"><img src="assets/isef-team.jpg" alt="ISEF 2025 team"><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
-        <figure class="shot"><img src="assets/sw-competition.jpg" alt="National high-school software competition"><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
-        <figure class="shot"><img src="assets/startup-stage.jpg" alt="Youth Startup Competition award stage"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-        <figure class="shot"><img src="assets/route-data.jpg" alt="Ant's movement analysis"><figcaption><span class="en">Ant's movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
-        <figure class="shot"><img src="assets/AI-Rookie.jpg" alt="AI Rookie competition"><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
-        <figure class="shot"><video autoplay muted loop playsinline preload="metadata"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant's movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
-        <!-- duplicate copy (seamless loop) -->
-        <figure class="shot" aria-hidden="true"><img src="assets/isef-booth.jpg" alt=""><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/award-swdonghaeng.jpg" alt=""><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/ebs-interview.jpg" alt=""><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/startup-booth.jpg" alt=""><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/isef-team.jpg" alt=""><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/sw-competition.jpg" alt=""><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/startup-stage.jpg" alt=""><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/route-data.jpg" alt=""><figcaption><span class="en">Ant's movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
-        <figure class="shot" aria-hidden="true"><img src="assets/AI-Rookie.jpg" alt=""><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
-        <figure class="shot"><video autoplay muted loop playsinline preload="metadata"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant's movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
+    <div class="showcase-head">
+      <div class="lbl"><span class="idx">§</span><span class="en">Highlights</span><span class="ko">발자취</span></div>
+      <div class="showcase-controls" aria-label="Highlight navigation">
+        <button class="scroll-btn prev" type="button" aria-label="Previous highlight">←</button>
+        <button class="scroll-btn next" type="button" aria-label="Next highlight">→</button>
       </div>
+    </div>
+    <div class="highlight-scroll" tabindex="0" aria-label="Scrollable highlights">
+      <!-- ‹EDIT› To add an item, place its media in /assets and copy one <figure> block. -->
+      <figure class="shot"><img src="assets/isef-booth.jpg" alt="ISEF 2025 booth, Cycling Tourism Platform"><figcaption><span class="en">ISEF 2025 · CYCLE CYCLE</span><span class="ko">ISEF 2025 · 시끌시끌</span></figcaption></figure>
+      <figure class="shot"><img src="assets/award-swdonghaeng.jpg" alt="SW동행 hackathon award ceremony"><figcaption><span class="en">SW동행 Hackathon · Grand Prize</span><span class="ko">SW동행 해커톤 · 대상</span></figcaption></figure>
+      <figure class="shot"><img src="assets/ebs-interview.jpg" alt="EBS1 interview"><figcaption><span class="en">EBS1 Interview</span><span class="ko">EBS1 인터뷰</span></figcaption></figure>
+      <figure class="shot"><img src="assets/startup-booth.jpg" alt="Youth Startup Competition booth"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+      <figure class="shot"><img src="assets/isef-team.jpg" alt="ISEF 2025 team"><figcaption><span class="en">ISEF 2025</span><span class="ko">ISEF 2025</span></figcaption></figure>
+      <figure class="shot"><img src="assets/sw-competition.jpg" alt="National high-school software competition"><figcaption><span class="en">SW Competition</span><span class="ko">전국 SW 경진대회</span></figcaption></figure>
+      <figure class="shot"><img src="assets/startup-stage.jpg" alt="Youth Startup Competition award stage"><figcaption><span class="en">Youth Startup Competition</span><span class="ko">청소년 창업경진대회</span></figcaption></figure>
+      <figure class="shot"><img src="assets/route-data.jpg" alt="Ant movement analysis"><figcaption><span class="en">Ant movement analysis</span><span class="ko">개미 움직임 분석</span></figcaption></figure>
+      <figure class="shot"><img src="assets/AI-Rookie.jpg" alt="AI Rookie competition"><figcaption><span class="en">AI Rookie Competition</span><span class="ko">AI 루키 경진대회</span></figcaption></figure>
+      <figure class="shot"><video autoplay muted loop playsinline preload="metadata" aria-label="Ant movement tracking video"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
     </div>
   </section>
 
@@ -459,6 +455,58 @@
   document.querySelectorAll('.reveal').forEach(function(el,i){
     el.style.transitionDelay = (Math.min(i,6)*60)+'ms'; io.observe(el);
   });
+
+  // Highlights: buttons, vertical-wheel conversion, keyboard navigation, and mouse drag.
+  (function(){
+    var scroller=document.querySelector('.highlight-scroll');
+    if(!scroller)return;
+    var prev=document.querySelector('.scroll-btn.prev');
+    var next=document.querySelector('.scroll-btn.next');
+
+    function step(){
+      var card=scroller.querySelector('.shot');
+      return card ? card.getBoundingClientRect().width+16 : 360;
+    }
+    function updateButtons(){
+      var max=scroller.scrollWidth-scroller.clientWidth-2;
+      if(prev)prev.disabled=scroller.scrollLeft<=2;
+      if(next)next.disabled=scroller.scrollLeft>=max;
+    }
+    if(prev)prev.addEventListener('click',function(){scroller.scrollBy({left:-step(),behavior:'smooth'});});
+    if(next)next.addEventListener('click',function(){scroller.scrollBy({left:step(),behavior:'smooth'});});
+    scroller.addEventListener('scroll',updateButtons,{passive:true});
+    window.addEventListener('resize',updateButtons);
+
+    scroller.addEventListener('wheel',function(e){
+      if(Math.abs(e.deltaY)>Math.abs(e.deltaX) && scroller.scrollWidth>scroller.clientWidth){
+        e.preventDefault();
+        scroller.scrollLeft+=e.deltaY;
+      }
+    },{passive:false});
+
+    scroller.addEventListener('keydown',function(e){
+      if(e.key==='ArrowRight'){e.preventDefault();scroller.scrollBy({left:step(),behavior:'smooth'});}
+      if(e.key==='ArrowLeft'){e.preventDefault();scroller.scrollBy({left:-step(),behavior:'smooth'});}
+    });
+
+    var dragging=false,startX=0,startScroll=0;
+    scroller.addEventListener('pointerdown',function(e){
+      if(e.pointerType==='touch')return;
+      dragging=true;startX=e.clientX;startScroll=scroller.scrollLeft;
+      scroller.classList.add('dragging');scroller.setPointerCapture(e.pointerId);
+    });
+    scroller.addEventListener('pointermove',function(e){
+      if(!dragging)return;
+      scroller.scrollLeft=startScroll-(e.clientX-startX);
+    });
+    function stopDrag(e){
+      if(!dragging)return;dragging=false;scroller.classList.remove('dragging');
+      try{scroller.releasePointerCapture(e.pointerId);}catch(err){}
+    }
+    scroller.addEventListener('pointerup',stopDrag);
+    scroller.addEventListener('pointercancel',stopDrag);
+    updateButtons();
+  })();
 </script>
 </body>
 </html>
