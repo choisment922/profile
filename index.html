@@ -502,7 +502,7 @@
     try{localStorage.setItem('lang', l);}catch(e){}
   }
   // sync title with the language chosen before paint
-  if(document.documentElement.classList.contains('ko')) document.title='최성민 — 에너지 AI';
+  if(document.documentElement.classList.contains('ko')) document.title='최성민';
 
   var io = new IntersectionObserver(function(es){
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
@@ -517,8 +517,11 @@
     var track=marquee&&marquee.querySelector('.track');
     if(!marquee||!track)return;
     var manual=false, dragging=false, startX=0, startScroll=0, moved=false;
+    var resumeTimer=null;
+    var animationDuration=70;
 
     function enableManual(){
+      clearTimeout(resumeTimer);
       if(manual)return;
       var matrix=new DOMMatrixReadOnly(getComputedStyle(track).transform);
       var offset=Math.abs(matrix.m41||0);
@@ -528,9 +531,29 @@
       track.querySelectorAll('[aria-hidden="true"]').forEach(function(el){el.removeAttribute('aria-hidden')});
     }
 
-    ['wheel','touchstart','pointerdown'].forEach(function(type){
-      marquee.addEventListener(type,enableManual,{passive:true,once:false});
-    });
+    function resumeAuto(){
+      if(!manual)return;
+      var loopWidth=track.scrollWidth/2;
+      var offset=loopWidth ? (marquee.scrollLeft%loopWidth) : 0;
+      var progress=loopWidth ? offset/loopWidth : 0;
+      manual=false;
+      marquee.classList.remove('manual');
+      marquee.scrollLeft=0;
+      track.style.animation='none';
+      track.offsetHeight;
+      track.style.animation='scroll '+animationDuration+'s linear infinite';
+      track.style.animationDelay=(-progress*animationDuration)+'s';
+    }
+
+    function scheduleResume(delay){
+      clearTimeout(resumeTimer);
+      resumeTimer=setTimeout(resumeAuto,delay||0);
+    }
+
+    marquee.addEventListener('wheel',function(){enableManual();scheduleResume(700)},{passive:true});
+    marquee.addEventListener('touchstart',enableManual,{passive:true});
+    marquee.addEventListener('touchend',function(){scheduleResume(120)},{passive:true});
+    marquee.addEventListener('touchcancel',function(){scheduleResume(120)},{passive:true});
 
     marquee.addEventListener('pointerdown',function(e){
       if(e.pointerType==='touch')return;
@@ -543,7 +566,7 @@
       if(Math.abs(dx)>4)moved=true;
       marquee.scrollLeft=startScroll-dx;
     });
-    function endDrag(){dragging=false}
+    function endDrag(){dragging=false;scheduleResume(120)}
     marquee.addEventListener('pointerup',endDrag);
     marquee.addEventListener('pointercancel',endDrag);
 
