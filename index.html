@@ -105,8 +105,19 @@
   .shot:hover{transform:translateY(-6px);border-color:var(--accent-line);box-shadow:0 14px 32px rgba(122,40,53,.12)}
   .shot img,.shot video{height:100%;width:auto;max-width:100%;display:block;object-fit:cover;transition:transform .5s ease}
   .shot:hover img,.shot:hover video{transform:scale(1.04)}
-  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 11px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78))}
+  .shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 11px;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78));pointer-events:none}
+  .shot:has(img){cursor:zoom-in}
   html.ko .shot figcaption{letter-spacing:.02em}
+
+  /* ── highlight image lightbox ── */
+  .lightbox{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:32px;background:rgba(15,15,16,.88);backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+  .lightbox.open{opacity:1;visibility:visible}
+  .lightbox-dialog{position:relative;max-width:min(94vw,1280px);max-height:90vh;transform:scale(.96);transition:transform .24s ease}
+  .lightbox.open .lightbox-dialog{transform:scale(1)}
+  .lightbox-image{display:block;max-width:100%;max-height:86vh;width:auto;height:auto;border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+  .lightbox-caption{margin-top:12px;text-align:center;color:rgba(255,255,255,.82);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em}
+  .lightbox-close{position:absolute;right:-14px;top:-14px;width:40px;height:40px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(20,20,20,.78);color:#fff;font-size:1.35rem;line-height:1;cursor:pointer}
+  body.lightbox-open{overflow:hidden}
   @media(max-width:640px){
     .showcase-head{padding:18px 24px 0}
     .showcase-controls{display:none}
@@ -274,6 +285,14 @@
       <figure class="shot"><video autoplay muted loop playsinline preload="metadata" aria-label="Ant movement tracking video"><source src="assets/route-video.mp4" type="video/mp4"></video><figcaption><span class="en">Ant movement tracking</span><span class="ko">개미 움직임 추적</span></figcaption></figure>
     </div>
   </section>
+
+  <div class="lightbox" id="highlight-lightbox" role="dialog" aria-modal="true" aria-label="Expanded highlight image" aria-hidden="true">
+    <div class="lightbox-dialog">
+      <button class="lightbox-close" type="button" aria-label="Close expanded image">×</button>
+      <img class="lightbox-image" alt="">
+      <div class="lightbox-caption"></div>
+    </div>
+  </div>
 
   <!-- ══════════ ABOUT ══════════ -->
   <section id="about">
@@ -456,55 +475,162 @@
     el.style.transitionDelay = (Math.min(i,6)*60)+'ms'; io.observe(el);
   });
 
-  // Highlights: buttons, vertical-wheel conversion, keyboard navigation, and mouse drag.
+  // Highlights: idle auto-scroll, manual controls, inertial dragging, and image lightbox.
   (function(){
     var scroller=document.querySelector('.highlight-scroll');
     if(!scroller)return;
     var prev=document.querySelector('.scroll-btn.prev');
     var next=document.querySelector('.scroll-btn.next');
+    var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var AUTO_DELAY=2400;      // resume this long after manual interaction
+    var AUTO_SPEED=0.34;      // pixels per frame at roughly 60 fps
+    var resumeAt=performance.now()+AUTO_DELAY;
+    var autoFrame=0;
+    var inertiaFrame=0;
+    var dragging=false;
+    var moved=false;
+    var startX=0,lastX=0,lastT=0;
+    var velocity=0;
 
     function step(){
       var card=scroller.querySelector('.shot');
       return card ? card.getBoundingClientRect().width+16 : 360;
     }
+    function maxScroll(){return Math.max(0,scroller.scrollWidth-scroller.clientWidth);}
     function updateButtons(){
-      var max=scroller.scrollWidth-scroller.clientWidth-2;
+      var max=maxScroll()-2;
       if(prev)prev.disabled=scroller.scrollLeft<=2;
       if(next)next.disabled=scroller.scrollLeft>=max;
     }
-    if(prev)prev.addEventListener('click',function(){scroller.scrollBy({left:-step(),behavior:'smooth'});});
-    if(next)next.addEventListener('click',function(){scroller.scrollBy({left:step(),behavior:'smooth'});});
+    function pauseAuto(ms){resumeAt=performance.now()+(ms||AUTO_DELAY);}
+    function manualScroll(amount){
+      pauseAuto();
+      scroller.scrollBy({left:amount,behavior:'smooth'});
+    }
+    if(prev)prev.addEventListener('click',function(){manualScroll(-step());});
+    if(next)next.addEventListener('click',function(){manualScroll(step());});
     scroller.addEventListener('scroll',updateButtons,{passive:true});
     window.addEventListener('resize',updateButtons);
 
+    // Convert a vertical wheel gesture into horizontal movement and let it coast.
     scroller.addEventListener('wheel',function(e){
-      if(Math.abs(e.deltaY)>Math.abs(e.deltaX) && scroller.scrollWidth>scroller.clientWidth){
-        e.preventDefault();
-        scroller.scrollLeft+=e.deltaY;
+      if(scroller.scrollWidth<=scroller.clientWidth)return;
+      var delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+      if(!delta)return;
+      e.preventDefault();
+      pauseAuto();
+      cancelAnimationFrame(inertiaFrame);
+      velocity+=delta*0.22;
+      function coast(){
+        scroller.scrollLeft+=velocity;
+        velocity*=0.91;
+        if(Math.abs(velocity)>.25) inertiaFrame=requestAnimationFrame(coast);
       }
+      inertiaFrame=requestAnimationFrame(coast);
     },{passive:false});
 
     scroller.addEventListener('keydown',function(e){
-      if(e.key==='ArrowRight'){e.preventDefault();scroller.scrollBy({left:step(),behavior:'smooth'});}
-      if(e.key==='ArrowLeft'){e.preventDefault();scroller.scrollBy({left:-step(),behavior:'smooth'});}
+      if(e.key==='ArrowRight'){e.preventDefault();manualScroll(step());}
+      if(e.key==='ArrowLeft'){e.preventDefault();manualScroll(-step());}
     });
 
-    var dragging=false,startX=0,startScroll=0;
+    // Pointer drag with velocity sampling and inertial release.
     scroller.addEventListener('pointerdown',function(e){
-      if(e.pointerType==='touch')return;
-      dragging=true;startX=e.clientX;startScroll=scroller.scrollLeft;
-      scroller.classList.add('dragging');scroller.setPointerCapture(e.pointerId);
+      if(e.button!==undefined&&e.button!==0)return;
+      pauseAuto();
+      cancelAnimationFrame(inertiaFrame);
+      dragging=true;moved=false;startX=lastX=e.clientX;lastT=performance.now();velocity=0;
+      scroller.classList.add('dragging');
+      scroller.setPointerCapture(e.pointerId);
     });
     scroller.addEventListener('pointermove',function(e){
       if(!dragging)return;
-      scroller.scrollLeft=startScroll-(e.clientX-startX);
+      var now=performance.now();
+      var dx=e.clientX-lastX;
+      var dt=Math.max(8,now-lastT);
+      if(Math.abs(e.clientX-startX)>5)moved=true;
+      scroller.scrollLeft-=dx;
+      velocity=(-dx/dt)*16.67;
+      lastX=e.clientX;lastT=now;
     });
     function stopDrag(e){
-      if(!dragging)return;dragging=false;scroller.classList.remove('dragging');
+      if(!dragging)return;
+      dragging=false;scroller.classList.remove('dragging');
       try{scroller.releasePointerCapture(e.pointerId);}catch(err){}
+      if(!moved)return;
+      var v=velocity;
+      function coast(){
+        scroller.scrollLeft+=v;
+        v*=0.94;
+        if(Math.abs(v)>.18) inertiaFrame=requestAnimationFrame(coast);
+      }
+      inertiaFrame=requestAnimationFrame(coast);
     }
     scroller.addEventListener('pointerup',stopDrag);
     scroller.addEventListener('pointercancel',stopDrag);
+    scroller.addEventListener('mouseenter',function(){pauseAuto(900);});
+    scroller.addEventListener('focusin',function(){pauseAuto();});
+    scroller.addEventListener('touchstart',function(){pauseAuto();},{passive:true});
+
+    // Continuous idle movement. At the end, return smoothly to the beginning.
+    function autoTick(now){
+      if(!reduced&&!dragging&&now>=resumeAt&&document.visibilityState==='visible'){
+        var max=maxScroll();
+        if(max>0){
+          if(scroller.scrollLeft>=max-1){
+            scroller.scrollTo({left:0,behavior:'smooth'});
+            resumeAt=now+900;
+          }else{
+            scroller.scrollLeft+=AUTO_SPEED;
+          }
+        }
+      }
+      autoFrame=requestAnimationFrame(autoTick);
+    }
+    autoFrame=requestAnimationFrame(autoTick);
+
+    // Click an image card to enlarge only that image. Dragging never opens it.
+    var lightbox=document.getElementById('highlight-lightbox');
+    var lightboxImg=lightbox&&lightbox.querySelector('.lightbox-image');
+    var lightboxCaption=lightbox&&lightbox.querySelector('.lightbox-caption');
+    var closeBtn=lightbox&&lightbox.querySelector('.lightbox-close');
+    var lastFocus=null;
+    function openLightbox(img,figure){
+      if(!lightbox||!lightboxImg)return;
+      lastFocus=document.activeElement;
+      lightboxImg.src=img.currentSrc||img.src;
+      lightboxImg.alt=img.alt||'';
+      var cap=figure.querySelector('figcaption');
+      lightboxCaption.innerHTML=cap?cap.innerHTML:'';
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden','false');
+      document.body.classList.add('lightbox-open');
+      closeBtn.focus();
+      pauseAuto(999999);
+    }
+    function closeLightbox(){
+      if(!lightbox)return;
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden','true');
+      document.body.classList.remove('lightbox-open');
+      lightboxImg.removeAttribute('src');
+      pauseAuto();
+      if(lastFocus&&lastFocus.focus)lastFocus.focus();
+    }
+    scroller.querySelectorAll('.shot img').forEach(function(img){
+      var figure=img.closest('.shot');
+      figure.setAttribute('tabindex','0');
+      figure.setAttribute('role','button');
+      figure.setAttribute('aria-label',(img.alt||'Highlight image')+' — enlarge');
+      figure.addEventListener('click',function(){if(!moved)openLightbox(img,figure);});
+      figure.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();openLightbox(img,figure);}
+      });
+    });
+    if(closeBtn)closeBtn.addEventListener('click',closeLightbox);
+    if(lightbox)lightbox.addEventListener('click',function(e){if(e.target===lightbox)closeLightbox();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lightbox&&lightbox.classList.contains('open'))closeLightbox();});
+
     updateButtons();
   })();
 </script>
